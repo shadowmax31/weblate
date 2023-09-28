@@ -23,7 +23,13 @@
   <ul class="list-group">
     <li class="list-group-item">
       {% if user_can_commit_translation %}
-        <a href="" class="pull-right flip link-post btn btn-primary" data-href="{% url "commit" path=object.get_url_path %}" {% if not pending_units %}disabled="disabled"{% endif %}>{% trans "Commit" %}</a>
+      <div style="display: flex" class="pull-right">
+        <form method="post" action="{% url "commit" path=object.get_url_path %}">
+          {% csrf_token %}
+      	  <input name="msg" type="text" placeholder="Message" required />
+          <button type="submit" class="flip btn btn-primary" {% if not pending_units %}disabled="disabled"{% endif %}>{% trans "Commit" %}</button>
+        </form>
+      </div>
       {% endif %}
       <h5 class="list-group-item-heading">
         {% blocktranslate count units=pending_units with count=pending_units|intcomma %}{{ count }} pending change{% plural %}{{ count }} pending changes{% endblocktranslate %}

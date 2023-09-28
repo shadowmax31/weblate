@@ -335,9 +335,9 @@ class Project(models.Model, PathMixin, CacheKeyMixin):
             return all(generator)
         return any(generator)
 
-    def commit_pending(self, reason, user):
+    def commit_pending(self, reason, user, msg: str = None):
         """Commit any pending changes."""
-        return self.on_repo_components(True, "commit_pending", reason, user)
+        return self.on_repo_components(True, "commit_pending", reason, user, msg=msg)
 
     def repo_needs_merge(self):
         return self.on_repo_components(False, "repo_needs_merge")

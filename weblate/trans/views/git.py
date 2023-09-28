@@ -144,4 +144,5 @@ def commit(request, path):
         obj.commit_pending,
         "commit",
         request.user,
+        msg=request.POST.get("msg")
     )

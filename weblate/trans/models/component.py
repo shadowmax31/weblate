@@ -1902,7 +1902,7 @@ class Component(models.Model, PathMixin, CacheKeyMixin, ComponentCategoryMixin):
         ]
 
     @perform_on_link
-    def commit_pending(self, reason: str, user, skip_push: bool = False):
+    def commit_pending(self, reason: str, user, skip_push: bool = False, msg: str = None):
         """Check whether there is any translation to be committed."""
         # Get all translation with pending changes, source translation first
         translations = sorted(
@@ -1942,7 +1942,7 @@ class Component(models.Model, PathMixin, CacheKeyMixin, ComponentCategoryMixin):
                 with sentry_sdk.start_span(
                     op="commit_pending", description=translation.full_slug
                 ):
-                    translation._commit_pending(reason, user)
+                    translation._commit_pending(reason, user, msg)
                 components[translation.component.pk] = translation.component
 
         # Fire postponed post commit signals

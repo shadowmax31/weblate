@@ -587,7 +587,7 @@ class Translation(models.Model, URLMixin, LoggerMixin, CacheKeyMixin):
         return self.component.commit_pending(reason, user, skip_push=skip_push)
 
     @transaction.atomic
-    def _commit_pending(self, reason: str, user):
+    def _commit_pending(self, reason: str, user, msg: str = None):
         """
         Translation commit implementation.
 
@@ -638,7 +638,7 @@ class Translation(models.Model, URLMixin, LoggerMixin, CacheKeyMixin):
             self.update_units(units, store, author_name, author.id)
 
             # Commit changes
-            self.git_commit(user, author_name, timestamp, skip_push=True, signals=False)
+            self.git_commit(user, author_name, timestamp, skip_push=True, signals=False, msg=msg)
 
         # Update stats (the translated flag might have changed)
         self.invalidate_cache()
@@ -683,6 +683,7 @@ class Translation(models.Model, URLMixin, LoggerMixin, CacheKeyMixin):
         signals=True,
         template: str | None = None,
         store_hash: bool = True,
+        msg: str = None
     ):
         """Wrapper for committing translation to git."""
         repository = self.component.repository
@@ -692,6 +693,10 @@ class Translation(models.Model, URLMixin, LoggerMixin, CacheKeyMixin):
             # Pre commit hook
             vcs_pre_commit.send(sender=self.__class__, translation=self, author=author)
 
+            if msg is not None:
+                template += "\n" + msg
+
+            self.log_info("template: %s", template)
             # Do actual commit with git lock
             if self.component.commit_files(
                 template=template,
